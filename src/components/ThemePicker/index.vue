@@ -81,7 +81,7 @@ export default {
           callback()
         }
       }
-      xhr.open('GET', url)
+      xhr.open('GET', url, true)
       xhr.send()
     },
 
