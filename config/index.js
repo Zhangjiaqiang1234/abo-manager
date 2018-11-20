@@ -12,12 +12,13 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/api': {
-        target: 'http://192.168.8.129:8060',  // 通过本地服务器将你的请求转发到这个地址
+        // target: 'http://192.168.8.129:8060',  // 通过本地服务器将你的请求转发到这个地址
       //   changeOrigin: true,  // 设置这个参数可以避免跨域
       // }
       // '/api': {
-      //   target: 'http://112.74.58.173:8999/',  // 通过本地服务器将你的请求转发到这个地址
-        // target: 'http://120.79.26.58:8666/',
+      //   target: 'http://112.74.58.173:8999/',   // 测试服 API 通过本地服务器将你的请求转发到这个地址
+        // target: 'http://39.108.217.205:8060/', // 旧的正式服 API
+        target: 'http://manager.abochain.io/', // 最新正式服 API
         changeOrigin: true,  // 设置这个参数可以避免跨域
       }
     },
