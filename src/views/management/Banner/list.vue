@@ -31,7 +31,7 @@
           <span>{{scope.row.jump_type ===1 ? '新闻详情页': scope.row.jump_type ===2? '公告':'网页'}}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="状态" width="100">
+      <el-table-column prop="show_flag" align="center" label="状态" width="100" :filters="[{ text: '显示', value: 1 }, { text: '隐藏', value: 0 }]" :filter-method="filterTag"> 
         <template slot-scope="scope">
           <span>{{scope.row.show_flag ===1 ? '显示':'隐藏'}}</span>
         </template>
@@ -111,6 +111,9 @@ export default {
     })
   },
   methods: {
+    filterTag(value, row) {
+      return row.show_flag === value
+    },
     getList(param) {
       this.listLoading = true
       getBannerList(param)
@@ -118,7 +121,6 @@ export default {
           this.list = response.data.data.list.sort(function(a, b) {
             return a.order_num > b.order_num ? 1 : -1
           })
-          console.log(this.list)
           if (response.data.data.list.length < 10) {
             this.listQuery.pageNum = 1
           }

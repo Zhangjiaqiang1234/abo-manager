@@ -20,7 +20,7 @@
               </el-row>
               <el-row>
                 <el-col :span="18">
-                  <el-form-item label-width="100px" label="排序序号:" class="postInfo-container-item" prop="orderNum">
+                  <el-form-item label-width="100px" label="排序序号:" class="postInfo-container-item" prop="orderNum" required>
                     <el-row justify="center" align="middle">
                       <el-col><el-input  v-model.trim="postForm.orderNum" style="width:220px"></el-input></el-col>
                       <el-col><span style="font-size:0.4rem">设置序号的咨询会在App端置顶，不设置的按发布时间排序；序号越小排序越靠前，相同序号，最新设置/修改的靠前</span></el-col>
@@ -28,14 +28,6 @@
                   </el-form-item>
                 </el-col>
               </el-row>
-              <!-- <el-row>
-                <el-col :span="10">
-                  <el-form-item label-width="100px" label="发布时间:" class="postInfo-container-item" prop='releaseTime' required :default-value='new Date()'>
-                    <el-date-picker v-model="postForm.releaseTime" type="datetime" value-forma="yyyy-MM-dd HH:mm:ss" placeholder="选择日期时间">
-                    </el-date-picker>
-                  </el-form-item>
-                </el-col>
-              </el-row> -->
             </div>
           </el-col>
         </el-row>
@@ -70,21 +62,42 @@
         <el-row>
           <el-col :span='6'>
             <el-form-item style="margin-bottom: 40px;" prop="" label="跳转内容" label-width="100px" required>
-              <el-input  v-model.trim="postForm.newsUrl" :maxlength="100" style="width:80%"></el-input>
+              <el-input  v-model.trim="postForm.Jump_url" :maxlength="100" style="width:80%"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
+          <el-col :span='6'>
+            <el-form-item style="margin-bottom: 40px;" label="新闻id" label-width="100px" required>
+              <el-select v-model="newsId" placeholder="新闻id" style="width:80%">
+                <el-option
+                  v-for="item in newsList"
+                  :key="item.id"
+                  :title="item.title"
+                  :value="item.id+'----'+item.title">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row v-show="urlBoxShow">
           <el-col>
             <el-form-item prop="newsUrl" label="Url地址" label-width="100px">
-              <el-input  v-model.trim="postForm.newsUrl" :maxlength="100" style="width:80%"></el-input>
+              <el-input v-model.trim="postForm.newsUrl" :maxlength="100" style="width:80%"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row v-show="!urlBoxShow">
+          <el-col>
+             <el-form-item prop="newsUrl" label="Url地址" label-width="100px">
+              <el-input placeholder="此链接是跳转至abo文章页面，无法编辑" :disabled="true" :maxlength="100" style="width:80%"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col :span='6'>
             <el-form-item style="margin-bottom: 40px;" prop="" label="状态" label-width="100px" required>
-              <el-radio v-model="postForm.showFlag" label='1'>可见</el-radio>
+              <el-radio v-model="postForm.showFlag" label='1'>显示</el-radio>
               <el-radio v-model="postForm.showFlag" label='0'>隐藏</el-radio>
             </el-form-item>
           </el-col>
@@ -104,6 +117,7 @@ import { getArticle, submitNews } from '@/api/article'
 import { uploadImage } from '@/api/service'
 import { validateURL } from '@/utils/validate'
 import moment from 'moment'
+import { fetchList } from '@/api/article'
 
 // import Warning from './Warning'
 
@@ -115,12 +129,10 @@ const defaultForm = {
   createBy: 0,
   modifiedBy: 0,
   content: '',
-  newsType: 1,
   addReadCount: 0,
   orderNum: null,
   coverImage: '',
-  showFlag: '1',
-  releaseTime: ''
+  showFlag: '1'
 }
 
 export default {
@@ -170,24 +182,24 @@ export default {
         { label: '健康课堂', value: 2 },
         { label: '活动', value: 3 }
       ],
+      newsList: [], // 文章列表
+      newsId: null, // 当前选中的对象的 id
+      newsIndex: -1, // 当前选中的对象的索引值
+      urlBoxShow: 1, // 是否可以输入 url 地址
       value: 1,
       loading1: false,
       pic1: '',
       postForm: Object.assign({}, defaultForm),
       loading: false,
       rules: {
-        title: [{ required: true, message: '标题不能为空' }],
-        newsType: [{ required: true, message: '新闻类型不能为空' }],
-        releaseTime: [{ required: true, message: '发布时间不能为空' }],
+        bannerName: [{ required: true, message: 'banner名称不能为空' }],
         orderNum: [
-          // { required: true, message: '序号不能为空' },
+          { required: true, message: '序号不能为空' },
           { validator: validateRequire, trigger: 'blur' }
         ],
         newsUrl: [{ validator: validateSourceUri }]
       }
     }
-  },
-  computed: {
   },
   created() {
     if (this.isEdit) {
@@ -198,19 +210,51 @@ export default {
       this.postForm = Object.assign({}, defaultForm)
     }
   },
+  watch: {
+    newsId(newValue) { // 每当重新选择了 新闻 id ，重新获取 url
+      this.newsId = newValue.replace(/----.*/ig, '')
+      for (const i in this.newsList) {
+        if (this.newsList[i].id === +this.newsId) {
+          this.newsIndex = i
+        }
+      }
+      this.postForm.newsUrl = this.newsList[this.newsIndex].newsUrl
+      if (this.newsList[this.newsIndex].content) { // 如果是跳转外部网页的
+        this.urlBoxShow = 0
+      } else {
+        this.urlBoxShow = 1
+      }
+    }
+  },
   mounted() {
+    this.getList({
+      pageNum: 1,
+      pageSize: 1000
+    })
     this.$refs.postForm.resetFields()
     this.pic1 = ''
     this.postForm.showFlag = '1'
     this.postForm.newsUrl = ''
     if (!this.isEdit) {
-      // this.postForm.releaseTime = this.formatDateTime(new Date())
-      this.postForm.releaseTime = new Date()
+      // this.postForm.releaseTime = new Date()
     }
   },
   beforeUpdate() {
   },
   methods: {
+    getList(param) { // 获取文章列表信息
+      this.listLoading = true
+      fetchList(param).then(response => {
+        this.newsList = response.data.data.sort(function(a, b) {
+          return a.modifyTime < b.modifyTime ? 1 : -1
+        })
+        if (response.data.data.length < 10) {
+          this.listQuery.pageNum = 1
+        }
+        this.total = response.data.data.length
+        this.listLoading = false
+      })
+    },
     // formatDateTime(inputTime) {
     //   var date = new Date(inputTime)
     //   var y = date.getFullYear()
@@ -240,10 +284,8 @@ export default {
         this.postForm.orderNum = response.data.data.orderNum
         this.postForm.newsUrl = response.data.data.newsUrl
         this.postForm.content = response.data.data.content
-        this.postForm.releaseTime = response.data.data.releaseTime
         this.postForm.addReadCount = response.data.data.addReadCount
         this.postForm.showFlag = response.data.data.showFlag.toString()
-        this.postForm.newsType = response.data.data.newsType
       }).catch(err => {
         console.log(err)
       })
@@ -251,20 +293,18 @@ export default {
     submitForm() {
       this.$refs.postForm.validate(valid => {
         if (valid) {
-          if (this.postForm.newsType === 3 && !this.postForm.coverImage) {
+          if (!this.postForm.coverImage) {
             this.$message({
-              message: '活动信息必须上传图片',
+              message: '必须上传Banner封面图片',
               type: 'warning'
             })
             return
           }
           this.postForm.showFlag = parseInt(this.postForm.showFlag)
-          // this.postForm.releaseTime = this.formatDateTime(this.postForm.releaseTime)
-          this.postForm.releaseTime = this.formatTime(this.postForm.releaseTime)
           if (!this.postForm.newsUrl) {
-            var html1 = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>' + this.postForm.title + '</title><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" /><style>img{max-width: 100%;}p{word-wrap:break-word}</style></head><body>'
-            var html2 = "<script type='text/javascript'>window.onload = function() {var lastTouchEnd = 0;document.addEventListener('touchstart', function(event) {if (event.touches.length > 1) {event.preventDefault();}});document.addEventListener('touchend', function(event) {var now = (new Date()).getTime();if (now - lastTouchEnd <= 300) {event.preventDefault();}lastTouchEnd = now;}, false);document.addEventListener('gesturestart', function(event) {event.preventDefault();});}<\/script></body></html>"
-            this.postForm.content = html1 + this.postForm.content + html2
+            // var html1 = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>' + this.postForm.title + '</title><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" /><style>img{max-width: 100%;}p{word-wrap:break-word}</style></head><body>'
+            // var html2 = "<script type='text/javascript'>window.onload = function() {var lastTouchEnd = 0;document.addEventListener('touchstart', function(event) {if (event.touches.length > 1) {event.preventDefault();}});document.addEventListener('touchend', function(event) {var now = (new Date()).getTime();if (now - lastTouchEnd <= 300) {event.preventDefault();}lastTouchEnd = now;}, false);document.addEventListener('gesturestart', function(event) {event.preventDefault();});}<\/script></body></html>"
+            // this.postForm.content = html1 + this.postForm.content + html2
           } else {
             this.postForm.content = ''
           }
@@ -279,7 +319,7 @@ export default {
                   duration: 2000
                 })
                 this.reload()
-                this.$router.push({ path: '/management/Article/list' })
+                this.$router.push({ path: '/management/Article/list/xxxx' })
                 this.$refs.postForm.resetFields()
               } else {
                 this.$notify({
@@ -291,6 +331,8 @@ export default {
               }
             })
           this.loading = false
+          console.log('即使是这样 也不让通过')
+          return false
         } else {
           console.log('error submit!!')
           return false
