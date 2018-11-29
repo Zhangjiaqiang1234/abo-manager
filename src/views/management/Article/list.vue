@@ -1,5 +1,6 @@
 <template>
   <div class="app-container">
+    <!-- 顶部单选框及新增按钮开始 -->
     <el-row style="margin-bottom:2%" type="flex" align="middle">
       <el-col :span="6">
       <span>新闻类型</span>
@@ -13,6 +14,7 @@
         </router-link>
       </el-col>
     </el-row>
+    <!-- 顶部单选框及新增按钮结束 -->
     <el-table :default-sort = "{prop: 'modifyTime', order: 'descending'}" :data="list.slice((listQuery.pageNum-1)*listQuery.pageSize,listQuery.pageNum*listQuery.pageSize)" v-loading.body="listLoading" border fit highlight-current-row style="width: 100%">
     <!-- <el-table :default-sort = "{prop: 'modifyTime', order: 'descending'}" :data="list" v-loading.body="listLoading" border fit highlight-current-row style="width: 100%">   -->
       <el-table-column align="center" prop="id" label="ID" width="80" sortable>

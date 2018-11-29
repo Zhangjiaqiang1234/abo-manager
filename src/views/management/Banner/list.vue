@@ -1,14 +1,8 @@
 <template>
   <div class="app-container">
     <el-row style="margin-bottom:2%" type="flex" align="middle">
-      <!-- <el-col :span="6">
-      <span>新闻类型</span>
-      <el-radio-group v-model="listQuery.typeId" @change="handleStyleChange()">
-      <el-radio v-for="position in positions" :label="position.value" :key="position.value" :value="position.value">{{position.label}}</el-radio>
-      </el-radio-group>
-      </el-col> -->
       <el-col :span="6">
-        <router-link to="/management/Article/create">
+        <router-link to="/management/Banner/create">
           <el-button type="primary" size="small" icon="el-icon-edit">新增</el-button>
         </router-link>
       </el-col>
@@ -21,91 +15,52 @@
           <span>{{scope.row.title}}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="URl地址">
+      <el-table-column align="center" label="缩略图" width="120">
         <template slot-scope="scope">
-          <span>{{scope.row.newsUrl}}</span>
+          <!-- <span>{{scope.row.readCount}}</span> -->
+          <img style="width:100%" :src="scope.row.image_url">
         </template>
       </el-table-column>
-      <el-table-column align="center" label="类型" width="80">
+      <el-table-column align="center" label="URl跳转地址">
         <template slot-scope="scope">
-          <span>{{scope.row.newsType ===1 ? '最新资讯': scope.row.newsType ===2? '健康课堂':'活动'}}</span>
+          <span>{{scope.row.Jump_url}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="跳转类型" width="100">
+        <template slot-scope="scope">
+          <span>{{scope.row.jump_type ===1 ? '新闻详情页': scope.row.jump_type ===2? '公告':'网页'}}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="状态" width="100">
         <template slot-scope="scope">
-          <span>{{scope.row.showFlag ===1 ? '显示':'隐藏'}}</span>
+          <span>{{scope.row.show_flag ===1 ? '显示':'隐藏'}}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="排序" width="80">
         <template slot-scope="scope">
-          <span>{{scope.row.orderNum}}</span>
+          <span>{{scope.row.order_num}}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="阅读量" width="120">
+      <el-table-column align="center" label="新闻id" width="120">
         <template slot-scope="scope">
-          <span>{{scope.row.readCount}}</span>
+          <span>{{scope.row.news_id}}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="附加阅读量" width="120">
+      <el-table-column align="center" label="创建时间" width="160">
         <template slot-scope="scope">
-          <span>{{scope.row.addReadCount}}</span>
+          <span>{{scope.row.create_time}}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="发布时间" width="160">
-        <template slot-scope="scope">
-          <span>{{scope.row.createTime}}</span>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="修改时间" width="160" prop="modifyTime" sortable>
+      <el-table-column align="center" label="修改时间" width="160" prop="modify_time" sortable>
       </el-table-column>
       <el-table-column fixed="right" label="操作" align='center'  width="200">
         <template slot-scope="scope">
-          <el-button  @click="deleteNew(scope.row.id)" size="small" type='danger' icon="el-icon-delete">删除</el-button>
+          <el-button  @click="deleteBanner(scope.row.id)" size="small" type='danger' icon="el-icon-delete">删除</el-button>
           <router-link :to="'/management/Banner/edit/'+scope.row.id">
             <el-button type="primary" size="small" icon="el-icon-edit">编辑</el-button>
           </router-link>
         </template>
       </el-table-column>
-      <!-- <el-table-column width="180px" align="center" label="Date">
-        <template slot-scope="scope">
-          <span>{{scope.row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}')}}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column width="120px" align="center" label="Author">
-        <template slot-scope="scope">
-          <span>{{scope.row.author}}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column width="100px" label="Importance">
-        <template slot-scope="scope">
-          <svg-icon v-for="n in +scope.row.importance" icon-class="star" class="meta-item__icon" :key="n"></svg-icon>
-        </template>
-      </el-table-column>
-
-      <el-table-column class-name="status-col" label="Status" width="110">
-        <template slot-scope="scope">
-          <el-tag :type="scope.row.status | statusFilter">{{scope.row.status}}</el-tag>
-        </template>
-      </el-table-column>
-
-      <el-table-column min-width="300px" label="Title">
-        <template slot-scope="scope">
-
-          <router-link class="link-type" :to="'/management/edit/'+scope.row.id">
-            <span>{{ scope.row.title }}</span>
-          </router-link>
-        </template>
-      </el-table-column> -->
-
-      <!-- <el-table-column align="center" label="Actions" width="120">
-        <template slot-scope="scope">
-          <router-link :to="'/management/edit/'+scope.row.id">
-            <el-button type="primary" size="small" icon="el-icon-edit">Edit</el-button>
-          </router-link>
-        </template>
-      </el-table-column> -->
     </el-table>
 
     <div class="pagination-container">
@@ -118,17 +73,11 @@
 </template>
 
 <script>
-import { fetchList, deleteArticle } from '@/api/article'
-
+import { getBannerList, deleteBanner } from '@/api/banner'
 export default {
-  name: 'articleList',
+  name: 'bannerList',
   data() {
     return {
-      // positions: [
-      //   { label: '最新资讯', value: 1 },
-      //   { label: '健康课堂', value: 2 },
-      //   { label: '活动', value: 3 }
-      // ],
       list: [],
       total: 0,
       listLoading: true,
@@ -164,33 +113,36 @@ export default {
   methods: {
     getList(param) {
       this.listLoading = true
-      fetchList(param)
+      getBannerList(param)
         .then(response => {
-          this.list = response.data.data.sort(function(a, b) {
-            return a.modifyTime < b.modifyTime ? 1 : -1
+          this.list = response.data.data.list.sort(function(a, b) {
+            return a.order_num > b.order_num ? 1 : -1
           })
-          if (response.data.data.length < 10) {
+          console.log(this.list)
+          if (response.data.data.list.length < 10) {
             this.listQuery.pageNum = 1
           }
-          this.total = response.data.data.length
+          this.total = response.data.data.list.length
           this.listLoading = false
         })
-        .catch(() => {
-          sessionStorage.clear()
-          this.$router.push({ path: '/login' })
+        .catch((err) => {
+          console.log('catch 了 但是不退出登录 err=')
+          console.log(err)
+          // sessionStorage.clear()
+          // this.$router.push({ path: '/login' })
         })
     },
     addArticle() {
 
     },
-    deleteNew(id) {
-      this.$confirm('此操作将永久删除该新闻, 是否继续?', '提示', {
+    deleteBanner(id) { // 删除 Banner 位
+      this.$confirm('此操作将永久删除该Banner推荐位, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         this.listLoading = true
-        deleteArticle(id).then(res => {
+        deleteBanner(id).then(res => {
           if (res.data.code === 200) {
             this.$message({
               message: res.data.message,

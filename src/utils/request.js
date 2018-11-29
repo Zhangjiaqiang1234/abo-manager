@@ -14,7 +14,14 @@ service.interceptors.request.use(config => {
   // Do something before request is sent
   if (sessionStorage.getItem('x-auth-token')) {
     // 让每个请求携带token-- ['X-Token']为自定义key 请根据实际情况自行修改
-    config.headers['x-auth-token'] = sessionStorage.getItem('x-auth-token')
+    if (config.newType) { // 使用新方式请求的接口 使用 baseUrl 不添加头信息
+      config.url = 'http://' + process.env.BASE_API + config.url
+      // config.headers['Content-Type'] = 'text/html; charset=utf-8'
+      // config.headers['Content-Type'] = 'application/x-www-form-urlencoded'
+      // config.headers['Content-Type'] = 'text/plain'
+    } else {
+      config.headers['x-auth-token'] = sessionStorage.getItem('x-auth-token')
+    }
   }
   return config
 }, error => {
