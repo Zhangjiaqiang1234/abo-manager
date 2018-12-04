@@ -15,10 +15,14 @@ service.interceptors.request.use(config => {
   if (sessionStorage.getItem('x-auth-token')) {
     // 让每个请求携带token-- ['X-Token']为自定义key 请根据实际情况自行修改
     if (config.newType) { // 使用新方式请求的接口 使用 baseUrl 不添加头信息
-      config.url = 'http://' + process.env.BASE_API + config.url
+      config.url = 'http://' + '39.108.217.205:8082' + config.url
       // config.headers['Content-Type'] = 'text/html; charset=utf-8'
       // config.headers['Content-Type'] = 'application/x-www-form-urlencoded'
       // config.headers['Content-Type'] = 'text/plain'
+      // 添加 token 头信息
+      config.data.access_token = sessionStorage.getItem('x-auth-token')
+      console.log('发送的 token = ')
+      console.log(sessionStorage.getItem('x-auth-token'))
     } else {
       config.headers['x-auth-token'] = sessionStorage.getItem('x-auth-token')
     }
@@ -33,15 +37,15 @@ service.interceptors.request.use(config => {
 service.interceptors.response.use(
   // response => response,
   response => {
-    // if (response.data.code === 1009) {
-    //   Message({
-    //     message: '请重新登录',
-    //     type: 'error',
-    //     duration: 5 * 1000
-    //   })
-    //   sessionStorage.clear()
-    //   this.$router.push({ path: '/login' })
-    // }
+    if (response.data.code === 0) {
+      Message({
+        message: '请重新登录',
+        type: 'error',
+        duration: 5 * 1000
+      })
+      // sessionStorage.clear()
+      // this.$router.push({ path: '/login' })
+    }
     /**
    * 下面的注释为通过在response里，自定义code来标示请求状态
    * 当code返回如下情况则说明权限有问题，登出并返回到登录页

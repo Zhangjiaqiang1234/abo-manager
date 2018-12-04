@@ -13,16 +13,16 @@
             <div class="postInfo-container">
               <el-row>
                 <el-col :span="18">
-                  <el-form-item label-width="100px" label="Banner名称" class="postInfo-container-item" prop='bannerName' required>
-                    <el-input  v-model.trim="postForm.bannerName"></el-input>
+                  <el-form-item label-width="100px" label="Banner名称" class="postInfo-container-item" prop='title' required>
+                    <el-input  v-model.trim="postForm.title"></el-input>
                   </el-form-item>
                 </el-col>
               </el-row>
               <el-row>
                 <el-col :span="18">
-                  <el-form-item label-width="100px" label="排序序号:" class="postInfo-container-item" prop="orderNum" required>
+                  <el-form-item label-width="100px" label="排序序号:" class="postInfo-container-item" prop="order_num" required>
                     <el-row justify="center" align="middle">
-                      <el-col><el-input  v-model.trim="postForm.orderNum" style="width:220px"></el-input></el-col>
+                      <el-col><el-input  v-model.trim="postForm.order_num" style="width:220px"></el-input></el-col>
                       <el-col><span style="font-size:0.4rem">设置序号的咨询会在App端置顶，不设置的按发布时间排序；序号越小排序越靠前，相同序号，最新设置/修改的靠前</span></el-col>
                     </el-row> 
                   </el-form-item>
@@ -33,7 +33,7 @@
         </el-row>
         <el-form-item style="margin-bottom: 40px;" label-width="100px" label="Banner图片:" >
           <el-row :gutter=10>
-            <el-col  v-model="postForm.coverImage" :md="9" :lg="8" :xl="5">
+            <el-col  v-model="postForm.image_url" :md="9" :lg="8" :xl="5">
               <input id='file1' ref="file1" type="file" name="file" class="inputfile" accept="image/jpeg,image/jpg,image/png" style="display:none" @change="changePic()"/>
               <div v-loading="loading1" class="uploadImg" @click="refInput()">
                 <i class="el-icon-upload" v-show="!pic1"></i>
@@ -45,7 +45,7 @@
             </el-col>
           </el-row>
         </el-form-item>
-        <el-row>
+        <!-- <el-row>
           <el-col :span='6'>
             <el-form-item style="margin-bottom: 40px;" label="跳转位置" label-width="100px" required>
               <el-select v-model="value" placeholder="跳转位置" style="width:80%">
@@ -58,18 +58,18 @@
               </el-select>
             </el-form-item>
           </el-col>
-        </el-row>
-        <el-row>
+        </el-row> -->
+        <!-- <el-row>
           <el-col :span='6'>
             <el-form-item style="margin-bottom: 40px;" prop="" label="跳转内容" label-width="100px" required>
               <el-input  v-model.trim="postForm.Jump_url" :maxlength="100" style="width:80%"></el-input>
             </el-form-item>
           </el-col>
-        </el-row>
+        </el-row> -->
         <el-row>
           <el-col :span='6'>
             <el-form-item style="margin-bottom: 40px;" label="新闻id" label-width="100px" required>
-              <el-select v-model="newsId" placeholder="新闻id" style="width:80%">
+              <el-select v-model="postForm.news_id" placeholder="新闻id" style="width:80%" @change="changeNewsid">
                 <el-option
                   v-for="item in newsList"
                   :key="item.id"
@@ -82,14 +82,14 @@
         </el-row>
         <el-row v-show="urlBoxShow">
           <el-col>
-            <el-form-item prop="newsUrl" label="Url地址" label-width="100px">
-              <el-input v-model.trim="postForm.newsUrl" :maxlength="100" style="width:80%"></el-input>
+            <el-form-item prop="Jump_url" label="Url地址" label-width="100px">
+              <el-input v-model.trim="postForm.Jump_url" :maxlength="100" style="width:80%"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row v-show="!urlBoxShow">
           <el-col>
-             <el-form-item prop="newsUrl" label="Url地址" label-width="100px">
+             <el-form-item prop="Jump_url" label="Url地址" label-width="100px">
               <el-input placeholder="此链接是跳转至abo文章页面，无法编辑" :disabled="true" :maxlength="100" style="width:80%"></el-input>
             </el-form-item>
           </el-col>
@@ -97,8 +97,8 @@
         <el-row>
           <el-col :span='6'>
             <el-form-item style="margin-bottom: 40px;" prop="" label="状态" label-width="100px" required>
-              <el-radio v-model="postForm.showFlag" label='1'>显示</el-radio>
-              <el-radio v-model="postForm.showFlag" label='0'>隐藏</el-radio>
+              <el-radio v-model="postForm.show_flag" label='1'>显示</el-radio>
+              <el-radio v-model="postForm.show_flag" label='0'>隐藏</el-radio>
             </el-form-item>
           </el-col>
         </el-row>
@@ -113,7 +113,7 @@ import MDinput from '@/components/MDinput'
 import Multiselect from 'vue-multiselect'// 使用的一个多选框组件，element-ui的select不能满足所有需求
 import 'vue-multiselect/dist/vue-multiselect.min.css'// 多选框组件css
 import Sticky from '@/components/Sticky' // 粘性header组件
-import { getArticle, submitNews } from '@/api/article'
+import { addBanner, getBanner } from '@/api/banner'
 import { uploadImage } from '@/api/service'
 import { validateURL } from '@/utils/validate'
 import moment from 'moment'
@@ -123,16 +123,14 @@ import { fetchList } from '@/api/article'
 
 const defaultForm = {
   title: '',
-  newsUrl: '',
-  createTime: '',
-  modifyTime: '',
-  createBy: 0,
-  modifiedBy: 0,
-  content: '',
-  addReadCount: 0,
-  orderNum: null,
-  coverImage: '',
-  showFlag: '1'
+  news_id: '',
+  Jump_url: '',
+  create_by: 1,
+  modify_by: 1,
+  order_num: null,
+  image_url: '',
+  show_flag: '1',
+  jump_type: '1'
 }
 
 export default {
@@ -177,27 +175,27 @@ export default {
       }
     }
     return {
-      options: [
-        { label: '最新资讯', value: 1 },
-        { label: '健康课堂', value: 2 },
-        { label: '活动', value: 3 }
-      ],
+      // options: [
+      //   { label: '最新资讯', value: 1 },
+      //   { label: '健康课堂', value: 2 },
+      //   { label: '活动', value: 3 }
+      // ],
       newsList: [], // 文章列表
-      newsId: null, // 当前选中的对象的 id
+      news_id: null, // 当前选中的对象的 id
       newsIndex: -1, // 当前选中的对象的索引值
       urlBoxShow: 1, // 是否可以输入 url 地址
-      value: 1,
+      // value: 1,
       loading1: false,
       pic1: '',
       postForm: Object.assign({}, defaultForm),
       loading: false,
       rules: {
-        bannerName: [{ required: true, message: 'banner名称不能为空' }],
-        orderNum: [
+        title: [{ required: true, message: 'banner名称不能为空' }],
+        order_num: [
           { required: true, message: '序号不能为空' },
           { validator: validateRequire, trigger: 'blur' }
         ],
-        newsUrl: [{ validator: validateSourceUri }]
+        Jump_url: [{ validator: validateSourceUri }]
       }
     }
   },
@@ -210,22 +208,6 @@ export default {
       this.postForm = Object.assign({}, defaultForm)
     }
   },
-  watch: {
-    newsId(newValue) { // 每当重新选择了 新闻 id ，重新获取 url
-      this.newsId = newValue.replace(/----.*/ig, '')
-      for (const i in this.newsList) {
-        if (this.newsList[i].id === +this.newsId) {
-          this.newsIndex = i
-        }
-      }
-      this.postForm.newsUrl = this.newsList[this.newsIndex].newsUrl
-      if (this.newsList[this.newsIndex].content) { // 如果是跳转外部网页的
-        this.urlBoxShow = 0
-      } else {
-        this.urlBoxShow = 1
-      }
-    }
-  },
   mounted() {
     this.getList({
       pageNum: 1,
@@ -233,8 +215,8 @@ export default {
     })
     this.$refs.postForm.resetFields()
     this.pic1 = ''
-    this.postForm.showFlag = '1'
-    this.postForm.newsUrl = ''
+    this.postForm.show_flag = '1'
+    this.postForm.Jump_url = ''
     if (!this.isEdit) {
       // this.postForm.releaseTime = new Date()
     }
@@ -242,6 +224,22 @@ export default {
   beforeUpdate() {
   },
   methods: {
+    changeNewsid() {
+      console.log('当select 改变会触发这个')
+      // 每当重新选择了 新闻 id ，重新获取 url 给跳转链接 和 新闻id 赋值
+      this.postForm.news_id = this.postForm.news_id.replace(/----.*/ig, '')
+      for (const i in this.newsList) {
+        if (this.newsList[i].id === +this.postForm.news_id) {
+          this.newsIndex = i
+        }
+      }
+      this.postForm.Jump_url = this.newsList[this.newsIndex].newsUrl
+      if (this.newsList[this.newsIndex].content) { // 如果是跳转外部网页的
+        this.urlBoxShow = 0
+      } else {
+        this.urlBoxShow = 1
+      }
+    },
     getList(param) { // 获取文章列表信息
       this.listLoading = true
       fetchList(param).then(response => {
@@ -277,15 +275,13 @@ export default {
       return moment(value).format('YYYY-MM-DD HH:mm:ss')
     },
     fetchData(id) {
-      getArticle(id).then(response => {
+      getBanner(id).then(response => {
         this.postForm.title = response.data.data.title
-        this.postForm.coverImage = response.data.data.coverImage
-        this.pic1 = response.data.data.coverImage
-        this.postForm.orderNum = response.data.data.orderNum
-        this.postForm.newsUrl = response.data.data.newsUrl
-        this.postForm.content = response.data.data.content
-        this.postForm.addReadCount = response.data.data.addReadCount
-        this.postForm.showFlag = response.data.data.showFlag.toString()
+        this.postForm.image_url = response.data.data.image_url
+        this.pic1 = response.data.data.image_url
+        this.postForm.order_num = response.data.data.order_num
+        this.postForm.Jump_url = response.data.data.Jump_url
+        this.postForm.show_flag = response.data.data.show_flag.toString()
       }).catch(err => {
         console.log(err)
       })
@@ -293,67 +289,65 @@ export default {
     submitForm() {
       this.$refs.postForm.validate(valid => {
         if (valid) {
-          if (!this.postForm.coverImage) {
+          if (!this.postForm.image_url) {
             this.$message({
               message: '必须上传Banner封面图片',
               type: 'warning'
             })
             return
           }
-          this.postForm.showFlag = parseInt(this.postForm.showFlag)
-          if (!this.postForm.newsUrl) {
+          this.postForm.show_flag = parseInt(this.postForm.show_flag)
+          if (!this.postForm.Jump_url) {
             // var html1 = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>' + this.postForm.title + '</title><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" /><style>img{max-width: 100%;}p{word-wrap:break-word}</style></head><body>'
             // var html2 = "<script type='text/javascript'>window.onload = function() {var lastTouchEnd = 0;document.addEventListener('touchstart', function(event) {if (event.touches.length > 1) {event.preventDefault();}});document.addEventListener('touchend', function(event) {var now = (new Date()).getTime();if (now - lastTouchEnd <= 300) {event.preventDefault();}lastTouchEnd = now;}, false);document.addEventListener('gesturestart', function(event) {event.preventDefault();});}<\/script></body></html>"
             // this.postForm.content = html1 + this.postForm.content + html2
           } else {
-            this.postForm.content = ''
+            // this.postForm.content = ''
           }
           this.loading = true
-          submitNews(this.postForm)
+          addBanner(this.postForm)
             .then(res => {
               if (res.data.code === 200) {
                 this.$notify({
                   title: '成功',
-                  message: '文章发布成功',
+                  message: 'banner发布成功',
                   type: 'success',
                   duration: 2000
                 })
                 this.reload()
-                this.$router.push({ path: '/management/Article/list/xxxx' })
+                this.$router.push({ path: '/management/Banner/list' })
                 this.$refs.postForm.resetFields()
               } else {
                 this.$notify({
                   title: '失败',
-                  message: '文章发布失败',
+                  message: 'banner发布失败',
                   type: 'warning',
                   duration: 2000
                 })
               }
             })
           this.loading = false
-          console.log('即使是这样 也不让通过')
-          return false
         } else {
           console.log('error submit!!')
           return false
         }
       })
     },
-    draftForm() {
-      if (this.postForm.content.length === 0 || this.postForm.title.length === 0) {
-        this.$message({
-          message: '请填写必要的标题和内容',
-          type: 'warning'
-        })
-        return
-      }
-      this.$message({
-        message: '保存成功',
-        type: 'success',
-        showClose: true,
-        duration: 1000
-      })
-    },
+    // draftForm() {
+    //   if (this.postForm.title.length === 0) {
+    //     this.$message({
+    //       message: '请填写必要的标题和内容',
+    //       type: 'warning'
+    //     })
+    //     return
+    //   }
+    //   this.$message({
+    //     message: '保存成功',
+    //     type: 'success',
+    //     showClose: true,
+    //     duration: 1000
+    //   })
+    // },
     changePic() {
       this.loading1 = true
       var f
@@ -365,7 +359,7 @@ export default {
           if (res.data.code === 200) {
             this.idcardImage1 = res.data.data[0]
             this.pic1 = res.data.data[0]
-            this.postForm.coverImage = res.data.data[0]
+            this.postForm.image_url = res.data.data[0]
             this.loading1 = false
           } else {
             // messageInfo(this.code(res.data.code))
