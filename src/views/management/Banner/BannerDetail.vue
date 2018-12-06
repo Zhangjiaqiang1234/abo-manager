@@ -68,7 +68,7 @@
         </el-row> -->
         <el-row>
           <el-col :span='6'>
-            <el-form-item style="margin-bottom: 40px;" label="新闻id" label-width="100px" required>
+            <el-form-item style="margin-bottom: 40px;" label="新闻id" label-width="100px" required prop='news_id'>
               <el-select v-model="postForm.news_id" placeholder="新闻id" style="width:80%" @change="changeNewsid">
                 <el-option
                   v-for="item in newsList"
@@ -113,7 +113,7 @@ import MDinput from '@/components/MDinput'
 import Multiselect from 'vue-multiselect'// 使用的一个多选框组件，element-ui的select不能满足所有需求
 import 'vue-multiselect/dist/vue-multiselect.min.css'// 多选框组件css
 import Sticky from '@/components/Sticky' // 粘性header组件
-import { addBanner, getBanner } from '@/api/banner'
+import { submitBanner, getBanner } from '@/api/banner'
 import { uploadImage } from '@/api/service'
 import { validateURL } from '@/utils/validate'
 import moment from 'moment'
@@ -122,6 +122,7 @@ import { fetchList } from '@/api/article'
 // import Warning from './Warning'
 
 const defaultForm = {
+  id: '',
   title: '',
   news_id: '',
   Jump_url: '',
@@ -129,10 +130,11 @@ const defaultForm = {
   modify_by: 1,
   order_num: null,
   image_url: '',
-  show_flag: '1',
-  jump_type: '1'
+  show_flag: 1,
+  jump_type: 1
 }
-
+// 允许最多可以显示的 banner 的数量
+const MAX_NUM = 5
 export default {
   inject: ['reload'],
   name: 'bannerDetail',
@@ -181,15 +183,16 @@ export default {
       //   { label: '活动', value: 3 }
       // ],
       newsList: [], // 文章列表
-      news_id: null, // 当前选中的对象的 id
-      newsIndex: -1, // 当前选中的对象的索引值
       urlBoxShow: 1, // 是否可以输入 url 地址
+      showFlagNum: 0, // 目前banner列表显示状态的数量
+      editShowFlag: '', // 如果是编辑状态下 当前文章的是否显示状态
       // value: 1,
       loading1: false,
       pic1: '',
       postForm: Object.assign({}, defaultForm),
       loading: false,
       rules: {
+        news_id: [{ required: true, message: '新闻id不能为空' }],
         title: [{ required: true, message: 'banner名称不能为空' }],
         order_num: [
           { required: true, message: '序号不能为空' },
@@ -200,7 +203,9 @@ export default {
     }
   },
   created() {
-    if (this.isEdit) {
+    const showFlagNum = this.$route.params && this.$route.params.showFlagNum
+    this.showFlagNum = showFlagNum
+    if (this.isEdit) { // 如果是编辑 banner
       const id = this.$route.params && this.$route.params.id
       this.postForm.id = id
       this.fetchData(id)
@@ -225,7 +230,6 @@ export default {
   },
   methods: {
     changeNewsid() {
-      console.log('当select 改变会触发这个')
       // 每当重新选择了 新闻 id ，重新获取 url 给跳转链接 和 新闻id 赋值
       this.postForm.news_id = this.postForm.news_id.replace(/----.*/ig, '')
       for (const i in this.newsList) {
@@ -235,8 +239,10 @@ export default {
       }
       this.postForm.Jump_url = this.newsList[this.newsIndex].newsUrl
       if (this.newsList[this.newsIndex].content) { // 如果是跳转外部网页的
+        this.postForm.jump_type = 3
         this.urlBoxShow = 0
       } else {
+        this.postForm.jump_type = 1
         this.urlBoxShow = 1
       }
     },
@@ -277,11 +283,13 @@ export default {
     fetchData(id) {
       getBanner(id).then(response => {
         this.postForm.title = response.data.data.title
+        this.postForm.news_id = response.data.data.news_id
         this.postForm.image_url = response.data.data.image_url
         this.pic1 = response.data.data.image_url
         this.postForm.order_num = response.data.data.order_num
         this.postForm.Jump_url = response.data.data.Jump_url
         this.postForm.show_flag = response.data.data.show_flag.toString()
+        this.editShowFlag = response.data.data.show_flag
       }).catch(err => {
         console.log(err)
       })
@@ -297,6 +305,19 @@ export default {
             return
           }
           this.postForm.show_flag = parseInt(this.postForm.show_flag)
+          this.editShowFlag = parseInt(this.editShowFlag)
+          // 判断已显示的banner数量是否已经达到上限5了，如果是修改需要注意当前的状态是否已是显示状态
+          if (this.postForm.show_flag === 1) { // 如果是要选择状态为显示
+            console.log('isEdit = ' + this.isEdit + '  showFlagNum =  ' + this.showFlagNum + '  editShowFlag =  ' + ' MAX_NUM =  ' + MAX_NUM)
+            if ((!this.isEdit && this.showFlagNum >= MAX_NUM) || (this.isEdit && this.showFlagNum >= MAX_NUM && this.editShowFlag === 0)) {
+              // 如果是新增，那么显示数已经大于等于5，不可新增显示的数据，如果是编辑，如果一开始是隐藏的且显示数大于等于5，不可新增
+              this.$message({
+                message: '当前显示状态的banner已超过' + MAX_NUM + '不可新增显示状态的 banner',
+                type: 'warning'
+              })
+              return
+            }
+          }
           if (!this.postForm.Jump_url) {
             // var html1 = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>' + this.postForm.title + '</title><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" /><style>img{max-width: 100%;}p{word-wrap:break-word}</style></head><body>'
             // var html2 = "<script type='text/javascript'>window.onload = function() {var lastTouchEnd = 0;document.addEventListener('touchstart', function(event) {if (event.touches.length > 1) {event.preventDefault();}});document.addEventListener('touchend', function(event) {var now = (new Date()).getTime();if (now - lastTouchEnd <= 300) {event.preventDefault();}lastTouchEnd = now;}, false);document.addEventListener('gesturestart', function(event) {event.preventDefault();});}<\/script></body></html>"
@@ -305,7 +326,7 @@ export default {
             // this.postForm.content = ''
           }
           this.loading = true
-          addBanner(this.postForm)
+          submitBanner(this.postForm)
             .then(res => {
               if (res.data.code === 200) {
                 this.$notify({

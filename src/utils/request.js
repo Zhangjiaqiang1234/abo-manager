@@ -21,8 +21,6 @@ service.interceptors.request.use(config => {
       // config.headers['Content-Type'] = 'text/plain'
       // 添加 token 头信息
       config.data.access_token = sessionStorage.getItem('x-auth-token')
-      console.log('发送的 token = ')
-      console.log(sessionStorage.getItem('x-auth-token'))
     } else {
       config.headers['x-auth-token'] = sessionStorage.getItem('x-auth-token')
     }

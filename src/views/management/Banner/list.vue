@@ -2,7 +2,7 @@
   <div class="app-container">
     <el-row style="margin-bottom:2%" type="flex" align="middle">
       <el-col :span="6">
-        <router-link to="/management/Banner/create">
+        <router-link :to="'/management/Banner/create/'+this.showFlagNum">
           <el-button type="primary" size="small" icon="el-icon-edit">新增</el-button>
         </router-link>
       </el-col>
@@ -17,7 +17,6 @@
       </el-table-column>
       <el-table-column align="center" label="缩略图" width="120">
         <template slot-scope="scope">
-          <!-- <span>{{scope.row.readCount}}</span> -->
           <img style="width:100%" :src="scope.row.image_url">
         </template>
       </el-table-column>
@@ -56,7 +55,7 @@
       <el-table-column fixed="right" label="操作" align='center'  width="200">
         <template slot-scope="scope">
           <el-button  @click="deleteBanner(scope.row.id)" size="small" type='danger' icon="el-icon-delete">删除</el-button>
-          <router-link :to="'/management/Banner/edit/'+scope.row.id">
+          <router-link :to="'/management/Banner/edit/'+scope.row.id+'/'+showFlagNum">
             <el-button type="primary" size="small" icon="el-icon-edit">编辑</el-button>
           </router-link>
         </template>
@@ -78,6 +77,7 @@ export default {
   name: 'bannerList',
   data() {
     return {
+      showFlagNum: 0,
       list: [],
       total: 0,
       listLoading: true,
@@ -124,6 +124,11 @@ export default {
           if (response.data.data.list.length < 10) {
             this.listQuery.pageNum = 1
           }
+          for (const i in response.data.data.list) { // 计数显示状态的banner数量
+            if (response.data.data.list[i].show_flag === 1) {
+              this.showFlagNum++
+            }
+          }
           this.total = response.data.data.list.length
           this.listLoading = false
         })
@@ -133,9 +138,6 @@ export default {
           // sessionStorage.clear()
           // this.$router.push({ path: '/login' })
         })
-    },
-    addArticle() {
-
     },
     deleteBanner(id) { // 删除 Banner 位
       this.$confirm('此操作将永久删除该Banner推荐位, 是否继续?', '提示', {
