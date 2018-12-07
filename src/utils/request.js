@@ -15,10 +15,8 @@ service.interceptors.request.use(config => {
   if (sessionStorage.getItem('x-auth-token')) {
     // 让每个请求携带token-- ['X-Token']为自定义key 请根据实际情况自行修改
     if (config.newType) { // 使用新方式请求的接口 使用 baseUrl 不添加头信息
-      config.url = 'http://' + '39.108.217.205:8082' + config.url
-      // config.headers['Content-Type'] = 'text/html; charset=utf-8'
-      // config.headers['Content-Type'] = 'application/x-www-form-urlencoded'
-      // config.headers['Content-Type'] = 'text/plain'
+      config.url = 'http://' + '39.108.217.205:8082' + config.url // 正式服
+      // config.url = 'http://' + '39.108.217.205:8082' + config.url // 测试服
       // 添加 token 头信息
       config.data.access_token = sessionStorage.getItem('x-auth-token')
     } else {

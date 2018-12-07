@@ -133,10 +133,10 @@ export default {
           this.listLoading = false
         })
         .catch((err) => {
-          console.log('catch 了 但是不退出登录 err=')
+          // console.log('catch 了 但是不退出登录 err=')
           console.log(err)
-          // sessionStorage.clear()
-          // this.$router.push({ path: '/login' })
+          sessionStorage.clear()
+          this.$router.push({ path: '/login' })
         })
     },
     deleteBanner(id) { // 删除 Banner 位
