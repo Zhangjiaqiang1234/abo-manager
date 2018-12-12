@@ -4,7 +4,7 @@
     <el-row style="margin-bottom:2%" type="flex" align="middle">
       <el-col :span="6">
       <span>新闻类型</span>
-      <el-radio-group v-model="listQuery.typeId" @change="handleStyleChange()">
+      <el-radio-group v-model="listQuery.news_type" @change="handleStyleChange()">
       <el-radio v-for="position in positions" :label="position.value" :key="position.value" :value="position.value">{{position.label}}</el-radio>
       </el-radio-group>
       </el-col>
@@ -15,8 +15,8 @@
       </el-col>
     </el-row>
     <!-- 顶部单选框及新增按钮结束 -->
-    <el-table :default-sort = "{prop: 'modifyTime', order: 'descending'}" :data="list.slice((listQuery.pageNum-1)*listQuery.pageSize,listQuery.pageNum*listQuery.pageSize)" v-loading.body="listLoading" border fit highlight-current-row style="width: 100%">
-    <!-- <el-table :default-sort = "{prop: 'modifyTime', order: 'descending'}" :data="list" v-loading.body="listLoading" border fit highlight-current-row style="width: 100%">   -->
+    <el-table :default-sort = "{prop: 'modify_time', order: 'descending'}" :data="list.slice((listQuery.pageNum-1)*listQuery.pageSize,listQuery.pageNum*listQuery.pageSize)" v-loading.body="listLoading" border fit highlight-current-row style="width: 100%">
+    <!-- <el-table :default-sort = "{prop: 'modify_time', order: 'descending'}" :data="list" v-loading.body="listLoading" border fit highlight-current-row style="width: 100%">   -->
       <el-table-column align="center" prop="id" label="ID" width="80" sortable>
       </el-table-column>
       <el-table-column align="center" label="title">
@@ -26,40 +26,40 @@
       </el-table-column>
       <el-table-column align="center" label="URl地址">
         <template slot-scope="scope">
-          <span>{{scope.row.newsUrl}}</span>
+          <span>{{scope.row.news_url}}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="类型" width="80">
         <template slot-scope="scope">
-          <span>{{scope.row.newsType ===1 ? '最新资讯': scope.row.newsType ===2? '健康课堂':'活动'}}</span>
+          <span>{{scope.row.news_type ===1 ? '最新资讯': scope.row.news_type ===2? '健康课堂':'活动'}}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="状态" width="100">
         <template slot-scope="scope">
-          <span>{{scope.row.showFlag ===1 ? '显示':'隐藏'}}</span>
+          <span>{{scope.row.show_flag ===1 ? '显示':'隐藏'}}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="排序" width="80">
         <template slot-scope="scope">
-          <span>{{scope.row.orderNum}}</span>
+          <span>{{scope.row.order_num}}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="阅读量" width="120">
         <template slot-scope="scope">
-          <span>{{scope.row.readCount}}</span>
+          <span>{{scope.row.read_count}}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="附加阅读量" width="120">
         <template slot-scope="scope">
-          <span>{{scope.row.addReadCount}}</span>
+          <span>{{scope.row.add_read_count}}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="发布时间" width="160">
         <template slot-scope="scope">
-          <span>{{scope.row.createTime}}</span>
+          <span>{{scope.row.create_time}}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="修改时间" width="160" prop="modifyTime" sortable>
+      <el-table-column align="center" label="修改时间" width="160" prop="modify_time" sortable>
       </el-table-column>
       <el-table-column fixed="right" label="操作" align='center'  width="200">
         <template slot-scope="scope">
@@ -138,7 +138,7 @@ export default {
       listQuery: {
         pageNum: 1,
         pageSize: 10,
-        typeId: null
+        news_type: null
       }
     }
   },
@@ -168,14 +168,18 @@ export default {
     getList(param) {
       this.listLoading = true
       fetchList(param).then(response => {
-        this.list = response.data.data.sort(function(a, b) {
-          return a.modifyTime < b.modifyTime ? 1 : -1
+        this.list = response.data.data.list.sort(function(a, b) {
+          return a.modify_time < b.modify_time ? 1 : -1
         })
-        if (response.data.data.length < 10) {
+        if (response.data.data.list.length < 10) {
           this.listQuery.pageNum = 1
         }
-        this.total = response.data.data.length
+        this.total = response.data.data.list.length
         this.listLoading = false
+      }).catch((err) => {
+        console.log('Article/list.vue->getList ' + err)
+        sessionStorage.clear()
+        this.$router.push({ path: '/login' })
       })
     },
     addArticle() {
@@ -223,7 +227,7 @@ export default {
       this.getList({
         pageNum: 1,
         pageSize: 10000,
-        typeId: this.listQuery.typeId
+        news_type: this.listQuery.news_type
       })
     },
     changeShow(row, column, cellValue, index) {

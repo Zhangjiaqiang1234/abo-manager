@@ -10,8 +10,8 @@
         <el-row>
           <!-- <Warning /> -->
           <el-col :span="24">
-            <el-form-item prop="newsType" label="发布位置" label-width="100px">
-              <el-radio-group v-model="postForm.newsType">
+            <el-form-item prop="news_type" label="发布位置" label-width="100px">
+              <el-radio-group v-model="postForm.news_type">
                 <el-radio   v-for="position in positions" :label="position.value" :key="position.value" :value="position.value">{{position.label}}</el-radio>
               </el-radio-group>
             </el-form-item>
@@ -23,18 +23,27 @@
             <div class="postInfo-container">
               <el-row>
                 <el-col :span="10">
-                  <el-form-item label-width="100px" label="发布时间:" class="postInfo-container-item" prop='releaseTime' required :default-value='new Date()'>
-                    <el-date-picker v-model="postForm.releaseTime" type="datetime" value-forma="yyyy-MM-dd HH:mm:ss" placeholder="选择日期时间">
+                  <el-form-item label-width="100px" label="发布时间:" class="postInfo-container-item" prop='create_time' required :default-value='new Date()'>
+                    <el-date-picker v-model="postForm.create_time" type="datetime" value-forma="yyyy-MM-dd HH:mm:ss" placeholder="选择日期时间">
                     </el-date-picker>
                   </el-form-item>
                 </el-col>
               </el-row>
               <el-row>
                   <el-col :span="18">
-                  <el-form-item label-width="100px" label="排序序号:" class="postInfo-container-item" prop="orderNum">
+                  <el-form-item label-width="100px" label="排序序号:" class="postInfo-container-item" prop="order_num">
                     <el-row justify="center" align="middle">
-                      <el-col><el-input  v-model.trim="postForm.orderNum" style="width:220px"></el-input></el-col>
+                      <el-col><el-input  v-model.trim="postForm.order_num" style="width:220px"></el-input></el-col>
                       <el-col><span style="font-size:0.4rem">设置序号的咨询会在App端置顶，不设置的按发布时间排序；序号越小排序越靠前，相同序号，最新设置/修改的靠前</span></el-col>
+                    </el-row> 
+                  </el-form-item>
+                  </el-col>
+              </el-row>
+              <el-row>
+                  <el-col :span="18">
+                  <el-form-item style="margin-left:-48px;" label-width="150px" label="价格（商城商品）:" class="postInfo-container-item" prop="price">
+                    <el-row justify="center" align="middle">
+                      <el-col><el-input v-model.trim="postForm.price" style="width:220px"></el-input></el-col>
                     </el-row> 
                   </el-form-item>
                   </el-col>
@@ -45,7 +54,7 @@
 
         <el-form-item style="margin-bottom: 40px;" label-width="100px" label="封面图片:" >
           <el-row :gutter=10>
-            <el-col  v-model="postForm.coverImage" :md="9" :lg="8" :xl="5">
+            <el-col  v-model="postForm.cover_image" :md="9" :lg="8" :xl="5">
               <input id='file1' ref="file1" type="file" name="file" class="inputfile" accept="image/jpeg,image/jpg,image/png" style="display:none" @change="changePic()"/>
               <div v-loading="loading1" class="uploadImg" @click="refInput()">
                 <i class="el-icon-upload" v-show="!pic1"></i>
@@ -58,8 +67,8 @@
             </el-col>
           </el-row>
         </el-form-item>
-        <el-form-item style="margin-bottom: 40px;" prop="newsUrl" label="Url地址" label-width="100px">
-          <el-input  v-model.trim="postForm.newsUrl" :maxlength="100" style="width:80%">
+        <el-form-item style="margin-bottom: 40px;" prop="news_url" label="Url地址" label-width="100px">
+          <el-input  v-model.trim="postForm.news_url" :maxlength="100" style="width:80%">
           </el-input>
           <p>*URL链接有内容时，文本编辑器内的内容不显示</p>
         </el-form-item>
@@ -67,19 +76,19 @@
           <el-row>
             <el-col :span='10'>
               <el-form-item style="margin-bottom: 40px;" prop="" label="附加阅读量" label-width="100px">
-              <el-input name="name" v-model.trim="postForm.addReadCount" required :maxlength="100" style="width:20%">
+              <el-input name="name" v-model.trim="postForm.add_read_count" required :maxlength="100" style="width:20%">
               </el-input>
                </el-form-item>
             </el-col>
             <el-col :span='6'>
               <el-form-item style="margin-bottom: 40px;" prop="" label="状态" label-width="100px" required>
-              <el-radio v-model="postForm.showFlag" label='1'>可见</el-radio>
-              <el-radio v-model="postForm.showFlag" label='0'>隐藏</el-radio>
+              <el-radio v-model="postForm.show_flag" label='1'>可见</el-radio>
+              <el-radio v-model="postForm.show_flag" label='0'>隐藏</el-radio>
               </el-form-item>
             </el-col>
           </el-row>
        
-        <div class="editor-container" v-show="!postForm.newsUrl">
+        <div class="editor-container" v-show="!postForm.news_url">
           <Tinymce :height=400 ref="editor" v-model="postForm.content" />
         </div>
       </div>
@@ -103,18 +112,18 @@ import moment from 'moment'
 
 const defaultForm = {
   title: '',
-  newsUrl: '',
-  createTime: '',
-  modifyTime: '',
-  createBy: 0,
-  modifiedBy: 0,
+  news_url: '',
+  modify_time: '',
+  create_by: 0,
+  modified_by: 0,
   content: '',
-  newsType: 1,
-  addReadCount: 0,
-  orderNum: null,
-  coverImage: '',
-  showFlag: '1',
-  releaseTime: ''
+  news_type: 1,
+  add_read_count: 0,
+  order_num: null,
+  cover_image: '',
+  price: null,
+  show_flag: '1',
+  create_time: ''
 }
 
 export default {
@@ -128,7 +137,7 @@ export default {
     }
   },
   data() {
-    const validateRequire = (rule, value, callback) => {
+    const validateRequire = (rule, value, callback) => { // 对排序序号的验证规则
       var reg = /^[1-9]\d*$/
       if (value) {
         if (!reg.test(value)) {
@@ -138,6 +147,22 @@ export default {
             type: 'error'
           })
         } else {
+          callback()
+        }
+      } else {
+        callback()
+      }
+    }
+    const validatePrice = (rule, value, callback) => { // 对价格的验证规则
+      var reg = /^[0-9]+(\.\d+)?$/
+      if (value) {
+        if (!reg.test(value)) {
+          this.$message({
+            message: '价格必须大于等于0的两位小数',
+            type: 'error'
+          })
+        } else {
+          this.postForm.price = (1 * value).toFixed(2) // 验证成功后将数字截取为2位
           callback()
         }
       } else {
@@ -170,13 +195,17 @@ export default {
       loading: false,
       rules: {
         title: [{ required: true, message: '标题不能为空' }],
-        newsType: [{ required: true, message: '新闻类型不能为空' }],
-        releaseTime: [{ required: true, message: '发布时间不能为空' }],
-        orderNum: [
+        news_type: [{ required: true, message: '新闻类型不能为空' }],
+        price: [
+          { required: true, message: '价格不能为空' },
+          { validator: validatePrice, trigger: 'blur' }
+        ],
+        create_time: [{ required: true, message: '发布时间不能为空' }],
+        order_num: [
           // { required: true, message: '序号不能为空' },
           { validator: validateRequire, trigger: 'blur' }
         ],
-        newsUrl: [{ validator: validateSourceUri }]
+        news_url: [{ validator: validateSourceUri }]
       }
     }
   },
@@ -194,11 +223,11 @@ export default {
   mounted() {
     this.$refs.postForm.resetFields()
     this.pic1 = ''
-    this.postForm.showFlag = '1'
-    this.postForm.newsUrl = ''
+    this.postForm.show_flag = '1'
+    this.postForm.news_url = ''
     if (!this.isEdit) {
-      // this.postForm.releaseTime = this.formatDateTime(new Date())
-      this.postForm.releaseTime = new Date()
+      // this.postForm.create_time = this.formatDateTime(new Date())
+      this.postForm.create_time = new Date()
     }
   },
   beforeUpdate() {
@@ -227,16 +256,19 @@ export default {
     },
     fetchData(id) {
       getArticle(id).then(response => {
+        console.log('获取单条数据 res = ')
+        console.log(response)
         this.postForm.title = response.data.data.title
-        this.postForm.coverImage = response.data.data.coverImage
-        this.pic1 = response.data.data.coverImage
-        this.postForm.orderNum = response.data.data.orderNum
-        this.postForm.newsUrl = response.data.data.newsUrl
+        this.postForm.cover_image = response.data.data.cover_image
+        this.postForm.price = response.data.data.price
+        this.pic1 = response.data.data.cover_image
+        this.postForm.order_num = response.data.data.order_num
+        this.postForm.news_url = response.data.data.news_url
         this.postForm.content = response.data.data.content
-        this.postForm.releaseTime = response.data.data.releaseTime
-        this.postForm.addReadCount = response.data.data.addReadCount
-        this.postForm.showFlag = response.data.data.showFlag.toString()
-        this.postForm.newsType = response.data.data.newsType
+        this.postForm.create_time = response.data.data.create_time
+        this.postForm.add_read_count = response.data.data.add_read_count
+        this.postForm.show_flag = response.data.data.show_flag.toString()
+        this.postForm.news_type = response.data.data.news_type
       }).catch(err => {
         console.log(err)
       })
@@ -244,17 +276,17 @@ export default {
     submitForm() {
       this.$refs.postForm.validate(valid => {
         if (valid) {
-          if (this.postForm.newsType === 3 && !this.postForm.coverImage) {
+          if (this.postForm.news_type === 3 && !this.postForm.cover_image) {
             this.$message({
               message: '活动信息必须上传图片',
               type: 'warning'
             })
             return
           }
-          this.postForm.showFlag = parseInt(this.postForm.showFlag)
-          // this.postForm.releaseTime = this.formatDateTime(this.postForm.releaseTime)
-          this.postForm.releaseTime = this.formatTime(this.postForm.releaseTime)
-          if (!this.postForm.newsUrl) {
+          this.postForm.show_flag = parseInt(this.postForm.show_flag)
+          // this.postForm.create_time = this.formatDateTime(this.postForm.create_time)
+          this.postForm.create_time = this.formatTime(this.postForm.create_time)
+          if (!this.postForm.news_url) {
             var html1 = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>' + this.postForm.title + '</title><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" /><style>img{max-width: 100%;}p{word-wrap:break-word;width:95%;margin:0 auto;}</style></head><body>'
             var html2 = "<script type='text/javascript'>window.onload = function() {var lastTouchEnd = 0;document.addEventListener('touchstart', function(event) {if (event.touches.length > 1) {event.preventDefault();}});document.addEventListener('touchend', function(event) {var now = (new Date()).getTime();if (now - lastTouchEnd <= 300) {event.preventDefault();}lastTouchEnd = now;}, false);document.addEventListener('gesturestart', function(event) {event.preventDefault();});}<\/script></body></html>"
             this.postForm.content = html1 + this.postForm.content + html2
@@ -316,7 +348,7 @@ export default {
           if (res.data.code === 200) {
             this.idcardImage1 = res.data.data[0]
             this.pic1 = res.data.data[0]
-            this.postForm.coverImage = res.data.data[0]
+            this.postForm.cover_image = res.data.data[0]
             this.loading1 = false
           } else {
             // messageInfo(this.code(res.data.code))
