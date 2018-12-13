@@ -21,8 +21,6 @@ export function submitNews(data) {
   //   data
   // })
   const url = (data.id) ? '/admin/v1/article/edit' : '/admin/v1/article/add'
-  console.log('输出 data = ')
-  console.log(JSON.stringify(data))
   return request({
     url: url,
     method: 'post',

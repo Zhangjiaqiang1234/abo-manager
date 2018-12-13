@@ -2,7 +2,7 @@
   <div class="app-container">
     <!-- 顶部单选框及新增按钮开始 -->
     <el-row style="margin-bottom:2%" type="flex" align="middle">
-      <el-col :span="6">
+      <el-col :span="12" :sm="12" :md="9" :lg="8" :xl="6">
       <span>新闻类型</span>
       <el-radio-group v-model="listQuery.news_type" @change="handleStyleChange()">
       <el-radio v-for="position in positions" :label="position.value" :key="position.value" :value="position.value">{{position.label}}</el-radio>
@@ -24,9 +24,14 @@
           <span>{{scope.row.title}}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="URl地址">
+      <el-table-column align="center" label="URl地址" min-width="300">
         <template slot-scope="scope">
           <span>{{scope.row.news_url}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="价格（商城）" width="120">
+        <template slot-scope="scope">
+          <span>{{scope.row.price}}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="类型" width="80">

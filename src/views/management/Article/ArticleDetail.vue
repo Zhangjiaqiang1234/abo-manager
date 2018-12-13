@@ -256,8 +256,6 @@ export default {
     },
     fetchData(id) {
       getArticle(id).then(response => {
-        console.log('获取单条数据 res = ')
-        console.log(response)
         this.postForm.title = response.data.data.title
         this.postForm.cover_image = response.data.data.cover_image
         this.postForm.price = response.data.data.price
@@ -270,6 +268,7 @@ export default {
         this.postForm.show_flag = response.data.data.show_flag.toString()
         this.postForm.news_type = response.data.data.news_type
       }).catch(err => {
+        console.log('Article/ArticleDetail.vue -> getArticle error!')
         console.log(err)
       })
     },
