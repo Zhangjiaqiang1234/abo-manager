@@ -2,7 +2,7 @@
   <div class="app-container">
     <!-- 顶部单选框及新增按钮开始 -->
     <el-row style="margin-bottom:2%" type="flex" align="middle">
-      <el-col :span="12" :sm="12" :md="9" :lg="8" :xl="6">
+      <el-col :span="16" :sm="15" :md="13" :lg="11" :xl="7">
       <span>新闻类型</span>
       <el-radio-group v-model="listQuery.news_type" @change="handleStyleChange()">
       <el-radio v-for="position in positions" :label="position.value" :key="position.value" :value="position.value">{{position.label}}</el-radio>
@@ -36,7 +36,7 @@
       </el-table-column>
       <el-table-column align="center" label="类型" width="80">
         <template slot-scope="scope">
-          <span>{{scope.row.news_type ===1 ? '最新资讯': scope.row.news_type ===2? '健康课堂':'活动'}}</span>
+          <span>{{getName(scope.row.news_type)}}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="状态" width="100">
@@ -135,7 +135,8 @@ export default {
       positions: [
         { label: '最新资讯', value: 1 },
         { label: '健康课堂', value: 2 },
-        { label: '活动', value: 3 }
+        { label: '活动', value: 3 },
+        { label: '文章', value: 4 }
       ],
       list: [],
       total: 0,
@@ -170,6 +171,13 @@ export default {
     })
   },
   methods: {
+    getName(news_type) {
+      for (const i in this.positions) {
+        if (this.positions[i].value === news_type) {
+          return this.positions[i].label
+        }
+      }
+    },
     getList(param) {
       this.listLoading = true
       fetchList(param).then(response => {

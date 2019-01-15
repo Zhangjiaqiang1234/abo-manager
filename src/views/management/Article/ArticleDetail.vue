@@ -48,6 +48,52 @@
                   </el-form-item>
                   </el-col>
               </el-row>
+              <el-row>
+                  <el-col :span="18">
+                  <el-form-item label-width="100px" label="标签:" class="postInfo-container-item" prop="keywords">
+                    <el-row justify="center" align="middle">
+                      <el-col><el-input  v-model.trim="postForm.keywords" style="width:220px"></el-input></el-col>
+                      <el-col><span style="font-size:0.4rem">每个标签之间用英文逗号分隔开</span></el-col>
+                    </el-row> 
+                  </el-form-item>
+                  </el-col>
+              </el-row>
+              <el-row>
+                  <el-col :span="18">
+                  <el-form-item style="margin-left:-48px;" label-width="150px" label="销量:" class="postInfo-container-item" prop="sale_count">
+                    <el-row justify="center" align="middle">
+                      <el-col><el-input v-model.trim="postForm.sale_count" style="width:220px"></el-input></el-col>
+                    </el-row> 
+                  </el-form-item>
+                  </el-col>
+              </el-row>
+              <el-row>
+                  <el-col :span="18">
+                  <el-form-item style="margin-left:-48px;" label-width="150px" label="优惠金额:" class="postInfo-container-item" prop="coupon">
+                    <el-row justify="center" align="middle">
+                      <el-col><el-input v-model.trim="postForm.coupon" style="width:220px"></el-input></el-col>
+                    </el-row> 
+                  </el-form-item>
+                  </el-col>
+              </el-row>
+              <el-row>
+                  <el-col :span="18">
+                  <el-form-item style="margin-left:-48px;" label-width="150px" label="运费:" class="postInfo-container-item" prop="freight">
+                    <el-row justify="center" align="middle">
+                      <el-col><el-input v-model.trim="postForm.freight" style="width:220px"></el-input></el-col>
+                    </el-row> 
+                  </el-form-item>
+                  </el-col>
+              </el-row>
+              <el-row>
+                  <el-col :span="18">
+                  <el-form-item style="margin-left:-48px;" label-width="150px" label="库存:" class="postInfo-container-item" prop="in_stock">
+                    <el-row justify="center" align="middle">
+                      <el-col><el-input v-model.trim="postForm.in_stock" style="width:220px"></el-input></el-col>
+                    </el-row> 
+                  </el-form-item>
+                  </el-col>
+              </el-row>
             </div>
           </el-col>
         </el-row>
@@ -111,19 +157,24 @@ import moment from 'moment'
 // import Warning from './Warning'
 
 const defaultForm = {
-  title: '',
-  news_url: '',
-  modify_time: '',
-  create_by: 0,
-  modified_by: 0,
-  content: '',
-  news_type: 1,
-  add_read_count: 0,
-  order_num: null,
-  cover_image: '',
-  price: null,
-  show_flag: '1',
-  create_time: ''
+  title: '', // 标题
+  news_url: '', // 跳转地址
+  modify_time: '', // 修改时间
+  create_by: 0, // 创建人
+  modified_by: 0, // 修改人
+  content: '', // 跳转的落地页内容
+  news_type: 1, // 新闻类型
+  add_read_count: 0, // 附加阅读量
+  order_num: null, // 排序序号
+  cover_image: '', // 封面图
+  price: null, // 价格
+  show_flag: '1', // 是否显示
+  create_time: '', // 创建时间
+  keywords: '', // 标签
+  sale_count: 0, // 销量
+  coupon: 0, // 优惠金额
+  freight: 0, // 运费
+  in_stock: 0 // 库存
 }
 
 export default {
@@ -187,7 +238,8 @@ export default {
       positions: [
         { label: '最新资讯', value: 1 },
         { label: '健康课堂', value: 2 },
-        { label: '活动', value: 3 }
+        { label: '活动', value: 3 },
+        { label: '文章', value: 4 }
       ],
       loading1: false,
       pic1: '',
@@ -267,6 +319,11 @@ export default {
         this.postForm.add_read_count = response.data.data.add_read_count
         this.postForm.show_flag = response.data.data.show_flag.toString()
         this.postForm.news_type = response.data.data.news_type
+        this.postForm.keywords = response.data.data.keywords
+        this.postForm.sale_count = response.data.data.sale_count
+        this.postForm.coupon = response.data.data.coupon
+        this.postForm.freight = response.data.data.freight
+        this.postForm.in_stock = response.data.data.in_stock
       }).catch(err => {
         console.log('Article/ArticleDetail.vue -> getArticle error!')
         console.log(err)

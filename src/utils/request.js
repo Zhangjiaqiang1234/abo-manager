@@ -19,6 +19,8 @@ service.interceptors.request.use(config => {
       // config.url = 'http://' + '39.108.217.205:8082' + config.url // 测试服
       // 添加 token 头信息
       config.data.access_token = sessionStorage.getItem('x-auth-token')
+      // console.log('token = ')
+      // console.log(config.data.access_token)
     } else {
       config.headers['x-auth-token'] = sessionStorage.getItem('x-auth-token')
     }
